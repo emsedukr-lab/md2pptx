@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTML to MD / by. @01.126.21</title>
+  <style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, 'Apple SD Gothic Neo', 'Pretendard', sans-serif;
+  background: #F2F2F7;
+  color: #1C1C1E;
+  min-height: 100vh;
+}
+
+/* Top Bar */
+.top-bar {
+  background: rgba(255,255,255,0.5);
+  backdrop-filter: blur(50px) saturate(200%);
+  -webkit-backdrop-filter: blur(50px) saturate(200%);
+  border-bottom: 0.5px solid rgba(0,0,0,0.06);
+  padding: 16px 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  text-align: center;
+}
+.top-bar h1 {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  color: #1C1C1E;
+}
+.top-bar .subtitle {
+  font-size: 13px;
+  color: #8E8E93;
+  margin-top: 2px;
+}
+
+/* Container */
+.container {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+}
+
+/* Glass Card */
+.card {
+  background: rgba(255,255,255,0.55);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+  border: 0.5px solid rgba(255,255,255,0.6);
+  border-radius: 22px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06), 0 0 1px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.7);
+  padding: 24px;
+  margin-bottom: 16px;
+}
+.card h2 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 14px;
+  color: #1C1C1E;
+}
+
+/* Drop Zone */
+.drop-zone {
+  background: rgba(255,255,255,0.35);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 2px dashed rgba(0,122,255,0.3);
+  border-radius: 20px;
+  padding: 48px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+.drop-zone:hover, .drop-zone.dragover {
+  background: rgba(0,122,255,0.06);
+  border-color: rgba(0,122,255,0.6);
+}
+.drop-zone .drop-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+  display: block;
+  opacity: 0.6;
+}
+.drop-zone p {
+  font-size: 15px;
+  color: #8E8E93;
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+.drop-zone .hint {
+  font-size: 12px;
+  color: #AEAEB2;
+}
+
+/* File Input Hidden */
+.file-input { display: none; }
+
+/* File List */
+.file-list { margin-top: 14px; }
+.sort-row {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 10px;
+}
+.sort-row label { font-size: 13px; color: #8E8E93; font-weight: 500; }
+.sort-dropdown {
+  background: rgba(255,255,255,0.5);
+  border: 0.5px solid rgba(0,0,0,0.1);
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-size: 13px;
+  color: #1C1C1E;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+/* File Item */
+.file-item {
+  background: rgba(255,255,255,0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 0.5px solid rgba(0,0,0,0.06);
+  border-radius: 16px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  animation: slideIn 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+.file-item:hover {
+  background: rgba(255,255,255,0.6);
+}
+.file-item.removing {
+  animation: slideOut 0.25s cubic-bezier(0.4,0,0.2,1) forwards;
+}
+.file-item .file-name {
+  flex: 1;
+  font-weight: 500;
+  word-break: break-all;
+  color: #1C1C1E;
+}
+.file-item .file-size {
+  color: #8E8E93;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* Delete Button (X) - iOS Circle Style */
+.del-btn {
+  background: rgba(255,59,48,0.12);
+  border: none;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  color: #FF3B30;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+.del-btn:hover {
+  background: rgba(255,59,48,0.22);
+}
+
+/* Clear All Button */
+.clear-all-btn {
+  background: rgba(255,255,255,0.45);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 0.5px solid rgba(0,0,0,0.08);
+  border-radius: 12px;
+  color: #8E8E93;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.clear-all-btn:hover {
+  background: rgba(255,255,255,0.65);
+  color: #FF3B30;
+}
+
+/* Help Text */
+.help-text {
+  font-size: 12px;
+  color: #AEAEB2;
+  margin-top: 12px;
+  line-height: 1.5;
+}
+
+/* Settings Row */
+.settings-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.settings-row label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #3A3A3C;
+}
+.settings-row select,
+.settings-row input[type="number"] {
+  background: rgba(255,255,255,0.5);
+  border: 0.5px solid rgba(0,0,0,0.1);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: #1C1C1E;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px 16px;
+}
+.option-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #3A3A3C;
+  cursor: pointer;
+}
+.option-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #007AFF;
+  cursor: pointer;
+}
+.option-item select {
+  background: rgba(255,255,255,0.5);
+  border: 0.5px solid rgba(0,0,0,0.1);
+  border-radius: 8px;
+  padding: 5px 8px;
+  font-size: 13px;
+  color: #1C1C1E;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+/* Primary Button - iOS Blue Glass */
+.btn-primary {
+  width: 100%;
+  padding: 16px;
+  background: rgba(0,122,255,0.82);
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  border: 0.5px solid rgba(255,255,255,0.3);
+  border-radius: 16px;
+  color: white;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 12px rgba(0,122,255,0.25), inset 0 1px 0 rgba(255,255,255,0.2);
+  transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+  letter-spacing: -0.2px;
+}
+.btn-primary:hover {
+  filter: brightness(1.05);
+  transform: scale(1.015);
+}
+.btn-primary:active {
+  transform: scale(0.97);
+  filter: brightness(0.95);
+}
+.btn-primary:disabled {
+  background: rgba(142,142,147,0.4);
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+  filter: none;
+}
+.btn-primary-pptx {
+  background: rgba(88,86,214,0.82);
+  box-shadow: 0 2px 12px rgba(88,86,214,0.25), inset 0 1px 0 rgba(255,255,255,0.2);
+}
+
+/* Results Section */
+.results { display: none; }
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.result-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.result-header h2 {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+/* Download Buttons */
+.download-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.btn-download {
+  padding: 10px 18px;
+  background: rgba(52,199,89,0.82);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 0.5px solid rgba(255,255,255,0.3);
+  border-radius: 14px;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(52,199,89,0.2);
+  transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+.btn-download:hover { filter: brightness(1.05); transform: scale(1.015); }
+.btn-download:active { transform: scale(0.97); }
+
+.btn-download-md {
+  background: rgba(88,86,214,0.82);
+  box-shadow: 0 2px 8px rgba(88,86,214,0.2);
+}
+.btn-download-merge {
+  background: rgba(255,149,0,0.82);
+  box-shadow: 0 2px 8px rgba(255,149,0,0.2);
+}
+.btn-download-sel {
+  background: rgba(88,86,214,0.82);
+  box-shadow: 0 2px 8px rgba(88,86,214,0.2);
+}
+
+/* Result Items - Horizontal Single Row */
+.url-item {
+  background: rgba(255,255,255,0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 0.5px solid rgba(0,0,0,0.06);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  margin-bottom: 6px;
+  transition: all 0.2s ease;
+}
+.url-item:hover { background: rgba(255,255,255,0.6); }
+.url-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  flex-shrink: 0;
+  accent-color: #007AFF;
+}
+.url-item .item-filename {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+  color: #3A3A3C;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+/* Status Badges - iOS Pill Style */
+.status-badge {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.status-pending { background: rgba(142,142,147,0.15); color: #8E8E93; }
+.status-parsing { background: rgba(0,122,255,0.12); color: #007AFF; }
+.status-extracting { background: rgba(88,86,214,0.12); color: #5856D6; }
+.status-converting { background: rgba(52,199,89,0.12); color: #34C759; }
+.status-done { background: rgba(52,199,89,0.15); color: #248A3D; }
+.status-error { background: rgba(255,59,48,0.12); color: #FF3B30; }
+
+.slide-count {
+  font-size: 11px;
+  color: #5856D6;
+  font-weight: 600;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+/* Action Buttons */
+.action-btn {
+  padding: 5px 12px;
+  background: rgba(255,255,255,0.5);
+  border: 0.5px solid rgba(0,0,0,0.08);
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  color: #3A3A3C;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.action-btn:hover { background: rgba(255,255,255,0.7); }
+.action-btn-dl {
+  background: rgba(0,122,255,0.08);
+  border-color: rgba(0,122,255,0.15);
+  color: #007AFF;
+}
+.action-btn-dl:hover { background: rgba(0,122,255,0.15); }
+
+/* Bulk Bar */
+.bulk-bar {
+  display: none;
+  padding: 12px 16px;
+  background: rgba(0,122,255,0.08);
+  border: 0.5px solid rgba(0,122,255,0.15);
+  border-radius: 14px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: #007AFF;
+  font-weight: 500;
+  align-items: center;
+  gap: 10px;
+}
+.bulk-bar.show { display: flex; }
+.bulk-bar span { flex: 1; }
+
+/* Preview Modal */
+.preview-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 200;
+  justify-content: center;
+  align-items: center;
+}
+.preview-modal.show { display: flex; }
+.preview-box {
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(50px) saturate(200%);
+  -webkit-backdrop-filter: blur(50px) saturate(200%);
+  border: 0.5px solid rgba(255,255,255,0.6);
+  border-radius: 22px;
+  width: 90%;
+  max-width: 720px;
+  max-height: 80vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.15), 0 0 1px rgba(0,0,0,0.1);
+}
+.preview-box-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 0.5px solid rgba(0,0,0,0.06);
+}
+.preview-box-header h3 {
+  font-size: 17px;
+  font-weight: 600;
+  color: #1C1C1E;
+}
+.preview-close {
+  background: rgba(142,142,147,0.12);
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  font-size: 16px;
+  cursor: pointer;
+  color: #8E8E93;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+.preview-close:hover { background: rgba(142,142,147,0.22); }
+.preview-content {
+  padding: 20px;
+  overflow-y: auto;
+  font-family: 'SF Mono', 'Menlo', monospace;
+  font-size: 13px;
+  white-space: pre-wrap;
+  line-height: 1.7;
+  color: #1C1C1E;
+}
+
+/* Animations */
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes slideOut {
+  to { opacity: 0; transform: translateX(20px) scale(0.95); height: 0; padding: 0; margin: 0; overflow: hidden; }
+}
+
+/* PPTX Pipeline Section */
+.pptx-section {
+  display: none;
+  margin-top: 0;
+}
+.pptx-section.show { display: block; }
+
+.btn-pptx {
+  padding: 10px 18px;
+  background: rgba(88,86,214,0.82);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 0.5px solid rgba(255,255,255,0.3);
+  border-radius: 14px;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(88,86,214,0.2);
+  transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+.btn-pptx:hover { filter: brightness(1.05); transform: scale(1.015); }
+.btn-pptx:active { transform: scale(0.97); }
+.btn-pptx:disabled {
+  background: rgba(142,142,147,0.4);
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+  filter: none;
+}
+
+.btn-delete-sel {
+  padding: 10px 18px;
+  background: rgba(255,59,48,0.82);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 0.5px solid rgba(255,255,255,0.3);
+  border-radius: 14px;
+  color: white;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(255,59,48,0.2);
+  transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+.btn-delete-sel:hover { filter: brightness(1.05); transform: scale(1.015); }
+.btn-delete-sel:active { transform: scale(0.97); }
+
+.pptx-settings {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px 16px;
+  margin-bottom: 0;
+}
+.pptx-setting-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.pptx-setting-item label {
+  font-size: 13px;
+  color: #8E8E93;
+  font-weight: 500;
+}
+.pptx-setting-item select,
+.pptx-setting-item input {
+  background: rgba(255,255,255,0.5);
+  border: 0.5px solid rgba(0,0,0,0.1);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: #1C1C1E;
+}
+
+.pptx-result-item {
+  background: rgba(88,86,214,0.06);
+  border: 0.5px solid rgba(88,86,214,0.15);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  margin-bottom: 8px;
+  animation: slideIn 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+.pptx-result-item .info { flex: 1; }
+.pptx-result-item .label {
+  font-size: 14px;
+  color: #5856D6;
+  font-weight: 600;
+  word-break: break-all;
+}
+.pptx-result-item .meta {
+  font-size: 12px;
+  color: #8E8E93;
+  margin-top: 2px;
+}
+
+.pptx-progress {
+  width: 100%;
+  height: 6px;
+  background: rgba(0,0,0,0.06);
+  border-radius: 3px;
+  margin: 12px 0;
+  overflow: hidden;
+}
+.pptx-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #5856D6, #AF52DE);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+  width: 0%;
+}
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <h1>HTML to MD / by. @01.126.21</h1>
+    <p class="subtitle">HTML 파일에서 슬라이드 원고 마크다운을 추출합니다</p>
+  </div>
+  <div class="container">
+    <div class="card">
+      <h2>HTML 파일 업로드</h2>
+      <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+        <span class="drop-icon">📂</span>
+        <p>HTML 파일을 드래그하거나 클릭하여 첨부하세요</p>
+        <p class="hint">지원 형식: .html, .htm | 최대 50MB, 최대 20개</p>
+      </div>
+      <input type="file" id="fileInput" class="file-input" multiple accept=".html,.htm">
+      <div class="file-list" id="fileList"></div>
+    </div>
+    <div class="card">
+      <h2>MD 변환 설정</h2>
+      <div class="options-grid">
+        <label class="option-item"><input type="checkbox" id="optSlideNum"> 슬라이드 번호</label>
+        <label class="option-item"><input type="checkbox" id="optPageNum" checked> 페이지 번호</label>
+        <label class="option-item"><input type="checkbox" id="optCoreMsg" checked> 핵심 메시지</label>
+        <label class="option-item"><input type="checkbox" id="optBody" checked> 본문</label>
+        <label class="option-item"><input type="checkbox" id="optLayout" checked> 레이아웃</label>
+        <label class="option-item">들여쓰기
+          <select id="indentSize">
+            <option value="2">2칸</option>
+            <option value="4" selected>4칸</option>
+          </select>
+        </label>
+      </div>
+    </div>
+    <button class="btn-primary" id="startBtn" onclick="startConversion()">HTML to MD</button>
+    <div class="results" id="results">
+      <div class="card">
+        <div class="result-header">
+          <div class="result-header-left">
+            <h2>MD 변환 결과</h2>
+          </div>
+          <div class="download-btns" id="downloadBtns" style="display:none"></div>
+        </div>
+        <div class="sort-row" id="resultSortRow" style="display:none">
+          <label>정렬:</label>
+          <select class="sort-dropdown" id="resultSortSelect" onchange="renderJobStatus(lastJob)">
+            <option value="name-asc" selected>이름순 (오름차순)</option>
+            <option value="name-desc">이름순 (내림차순)</option>
+            <option value="slides-asc">슬라이드 수 (적은순)</option>
+            <option value="slides-desc">슬라이드 수 (많은순)</option>
+            <option value="size-asc">파일 크기 (작은순)</option>
+            <option value="size-desc">파일 크기 (큰순)</option>
+          </select>
+        </div>
+        <div class="bulk-bar" id="bulkBar">
+          <span id="bulkCount">0개 선택</span>
+          <button class="btn-delete-sel" onclick="deleteSelectedItems()">선택 삭제</button>
+          <button class="btn-download btn-download-sel" onclick="downloadSelected()">선택 다운로드</button>
+        </div>
+        <div id="urlList"></div>
+      </div>
+      <div class="pptx-section" id="pptxSection">
+        <div class="card">
+          <h2>PPTX 변환 설정</h2>
+          <div class="pptx-settings">
+            <div class="pptx-setting-item">
+              <label>폰트</label>
+              <select id="pptxFont">
+                <option value="Malgun Gothic" selected>맑은 고딕</option>
+                <option value="Noto Sans KR">Noto Sans KR</option>
+                <option value="KoPubDotumMedium">KoPub돋움 Medium</option>
+                <option value="KoPubDotumLight">KoPub돋움 Light</option>
+                <option value="KoPubDotumBold">KoPub돋움 Bold</option>
+              </select>
+            </div>
+            <div class="pptx-setting-item">
+              <label>제목 크기</label>
+              <div style="display:flex;align-items:center;gap:4px">
+                <input type="number" id="pptxTitleSize" value="22" min="14" max="36">
+                <span style="font-size:12px;color:#AEAEB2">pt</span>
+              </div>
+            </div>
+            <div class="pptx-setting-item">
+              <label>본문 크기</label>
+              <div style="display:flex;align-items:center;gap:4px">
+                <input type="number" id="pptxBodySize" value="16" min="10" max="28">
+                <span style="font-size:12px;color:#AEAEB2">pt</span>
+              </div>
+            </div>
+          </div>
+          <div class="settings-row" style="margin-top:12px">
+            <label for="pptxLineSpacing">줄 간격:</label>
+            <input type="number" id="pptxLineSpacing" value="1.5" min="1.0" max="2.5" step="0.1" style="width:70px">
+          </div>
+        </div>
+        <button class="btn-primary btn-primary-pptx" id="pptxConvertBtn" onclick="convertSelectedToPptx()">MD to PPTX</button>
+        <div id="pptxProgress" style="display:none">
+          <div class="pptx-progress"><div class="pptx-progress-bar" id="pptxProgressBar"></div></div>
+          <p id="pptxProgressText" style="font-size:13px;color:#5856D6;font-weight:500;text-align:center;margin-top:8px"></p>
+        </div>
+        <div id="pptxResults"></div>
+      </div>
+    </div>
+  </div>
+  <div class="preview-modal" id="previewModal">
+    <div class="preview-box">
+      <div class="preview-box-header">
+        <h3>미리보기</h3>
+        <button class="preview-close" onclick="closePreview()">X</button>
+      </div>
+      <div class="preview-content" id="previewContent"></div>
+    </div>
+  </div>
+  <script>
+    var uploadedFiles = [];
+    var currentJobId = null;
+    var pollingInterval = null;
+    var lastJob = null;
+    var STATUS_LABELS = {
+      pending:    { label: '대기중',   cls: 'status-pending' },
+      parsing:    { label: '파싱중',   cls: 'status-parsing' },
+      extracting: { label: '추출중',   cls: 'status-extracting' },
+      converting: { label: '변환중',   cls: 'status-converting' },
+      done:       { label: '완료',     cls: 'status-done' },
+      error:      { label: '오류',     cls: 'status-error' },
+      deleted:    { label: '삭제됨',   cls: 'status-error' }
+    };
+    var dropZone = document.getElementById('dropZone');
+    dropZone.addEventListener('dragover', function(e) { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', function() { dropZone.classList.remove('dragover'); });
+    dropZone.addEventListener('drop', function(e) {
+      e.preventDefault(); dropZone.classList.remove('dragover');
+      addFiles(Array.from(e.dataTransfer.files));
+    });
+    document.getElementById('fileInput').addEventListener('change', function(e) {
+      addFiles(Array.from(e.target.files)); e.target.value = '';
+    });
+    function countSlidesInHtml(htmlContent) {
+      var matches = htmlContent.match(/#{1,2}\s*\[?\d+\]?\s*[:：]/g);
+      return matches ? matches.length : 0;
+    }
+    function addFiles(files) {
+      var pending = files.length;
+      files.forEach(function(f) {
+        var exists = uploadedFiles.some(function(u) { return u.name === f.name && u.size === f.size; });
+        if (exists) { pending--; if (pending === 0) renderFileList(); return; }
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          var content = e.target.result;
+          var slideCount = countSlidesInHtml(content);
+          var baseName = f.name.replace(/\.[^.]+$/, '');
+          var ext = f.name.match(/\.[^.]+$/) ? f.name.match(/\.[^.]+$/)[0] : '';
+          var displayName = slideCount > 0 ? baseName + '(' + slideCount + ')' + ext : f.name;
+          uploadedFiles.push({ file: f, name: f.name, size: f.size, customName: '', displayName: displayName, slideCount: slideCount });
+          pending--;
+          if (pending === 0) renderFileList();
+        };
+        reader.onerror = function() {
+          uploadedFiles.push({ file: f, name: f.name, size: f.size, customName: '', displayName: f.name, slideCount: 0 });
+          pending--;
+          if (pending === 0) renderFileList();
+        };
+        reader.readAsText(f);
+      });
+    }
+    function removeFile(idx) {
+      var target = document.querySelector('.file-item[data-orig-idx="' + idx + '"]');
+      if (target) {
+        target.classList.add('removing');
+        setTimeout(function() {
+          uploadedFiles.splice(idx, 1);
+          renderFileList();
+        }, 250);
+      } else {
+        uploadedFiles.splice(idx, 1);
+        renderFileList();
+      }
+    }
+    function clearAllFiles() {
+      uploadedFiles = [];
+      document.getElementById('fileInput').value = '';
+      renderFileList();
+    }
+    function formatSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+      return (bytes/1024/1024).toFixed(1) + ' MB';
+    }
+    function naturalCompare(a, b) {
+      return a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' });
+    }
+    function sortFiles(arr, sortKey) {
+      var sorted = arr.slice();
+      sorted.sort(function(a, b) {
+        switch(sortKey) {
+          case 'name-asc': return naturalCompare(a.name || a.label || '', b.name || b.label || '');
+          case 'name-desc': return naturalCompare(b.name || b.label || '', a.name || a.label || '');
+          case 'slides-asc': return (a.slideCount || 0) - (b.slideCount || 0);
+          case 'slides-desc': return (b.slideCount || 0) - (a.slideCount || 0);
+          case 'size-asc': return (a.size || a.contentLength || 0) - (b.size || b.contentLength || 0);
+          case 'size-desc': return (b.size || b.contentLength || 0) - (a.size || a.contentLength || 0);
+          default: return 0;
+        }
+      });
+      return sorted;
+    }
+    function renderFileList() {
+      var list = document.getElementById('fileList');
+      if (uploadedFiles.length === 0) { list.innerHTML = ''; return; }
+      var currentSort = document.getElementById('fileSortSelect') ? document.getElementById('fileSortSelect').value : 'name-asc';
+      var indexed = uploadedFiles.map(function(u, i) { return Object.assign({}, u, {origIdx: i}); });
+      var sorted = sortFiles(indexed, currentSort);
+      list.innerHTML =
+      '<div class="sort-row">' +
+        '<label>정렬:</label>' +
+        '<select class="sort-dropdown" id="fileSortSelect" onchange="renderFileList()">' +
+          '<option value="name-asc" selected>이름순 (오름차순)</option>' +
+          '<option value="name-desc">이름순 (내림차순)</option>' +
+          '<option value="slides-asc">슬라이드 수 (적은순)</option>' +
+          '<option value="slides-desc">슬라이드 수 (많은순)</option>' +
+          '<option value="size-asc">파일 크기 (작은순)</option>' +
+          '<option value="size-desc">파일 크기 (큰순)</option>' +
+        '</select>' +
+      '</div>' +
+      sorted.map(function(u) {
+        var displayName = u.displayName || u.name;
+        return '<div class="file-item" data-orig-idx="' + u.origIdx + '">' +
+          '<span class="file-name">📎 ' + displayName + '</span>' +
+          '<span class="file-size">' + formatSize(u.size) + '</span>' +
+          '<button class="del-btn" onclick="removeFile(' + u.origIdx + ')" title="이 파일 삭제">✕</button></div>';
+      }).join('') +
+      '<div style="text-align:right;margin-top:8px">' +
+        '<button class="clear-all-btn" onclick="clearAllFiles()">전체 삭제</button>' +
+      '</div>';
+      document.getElementById('fileSortSelect').value = currentSort;
+    }
+    async function startConversion() {
+      if (uploadedFiles.length === 0) { alert('파일을 업로드하세요.'); return; }
+      document.getElementById('startBtn').disabled = true;
+      document.getElementById('results').style.display = 'block';
+      document.getElementById('downloadBtns').style.display = 'none';
+      document.getElementById('downloadBtns').innerHTML = '';
+      document.getElementById('bulkBar').classList.remove('show');
+      var indentSize = document.getElementById('indentSize').value;
+      var formData = new FormData();
+      formData.append('indentSize', indentSize);
+      formData.append('showSlideNumber', document.getElementById('optSlideNum').checked);
+      formData.append('showPageNumber', document.getElementById('optPageNum').checked);
+      formData.append('showCoreMessage', document.getElementById('optCoreMsg').checked);
+      formData.append('showBody', document.getElementById('optBody').checked);
+      formData.append('showLayout', document.getElementById('optLayout').checked);
+      uploadedFiles.forEach(function(u) { formData.append('files', u.file, u.name); });
+      try {
+        var res = await fetch('/api/convert', { method: 'POST', body: formData });
+        var data = await res.json();
+        currentJobId = data.jobId;
+        startPolling();
+      } catch (e) {
+        alert('요청 실패: ' + e.message);
+        document.getElementById('startBtn').disabled = false;
+      }
+    }
+    function startPolling() {
+      if (pollingInterval) clearInterval(pollingInterval);
+      pollingInterval = setInterval(async function() {
+        try {
+          var res = await fetch('/api/status/' + currentJobId);
+          var job = await res.json();
+          lastJob = job;
+          renderJobStatus(job);
+          if (job.status === 'done' || job.status === 'error') {
+            clearInterval(pollingInterval);
+            document.getElementById('startBtn').disabled = false;
+            showDownloadButtons(job);
+          }
+        } catch(e) { console.error(e); }
+      }, 1500);
+    }
+    function showDownloadButtons(job) {
+      var btnsDiv = document.getElementById('downloadBtns');
+      var doneItems = (job.items || []).filter(function(it) { return it.status === 'done'; });
+      if (doneItems.length === 0) return;
+      var html = '<button class="btn-download btn-download-sel" onclick="toggleSelectAll()">전체 선택</button>';
+      if (doneItems.length === 1) {
+        html += '<button class="btn-download btn-download-md" onclick="downloadSingleMD()">MD 다운로드</button>';
+      } else {
+        if (job.zipPath) {
+          html += '<button class="btn-download" onclick="downloadZip()">ZIP 다운로드 (' + doneItems.length + '개)</button>';
+        }
+        html += '<button class="btn-download btn-download-merge" onclick="downloadMerged()">전체 병합</button>';
+      }
+      btnsDiv.innerHTML = html;
+      btnsDiv.style.display = 'flex';
+      showPptxSection();
+    }
+    function renderJobStatus(job) {
+      if (!job) return;
+      var list = document.getElementById('urlList');
+      var resultSortRow = document.getElementById('resultSortRow');
+      if (resultSortRow) {
+        resultSortRow.style.display = (job.items || []).length >= 2 ? 'flex' : 'none';
+      }
+      var resultSortKey = document.getElementById('resultSortSelect') ? document.getElementById('resultSortSelect').value : 'name-asc';
+      var itemsWithIdx = (job.items || []).map(function(item, i) { return Object.assign({}, item, {origIdx: i}); });
+      var sortedItems = sortFiles(itemsWithIdx, resultSortKey);
+      list.innerHTML = sortedItems.map(function(item) {
+        var i = item.origIdx;
+        var s = STATUS_LABELS[item.status] || STATUS_LABELS.pending;
+        var isDone = item.status === 'done';
+        var result = '<div class="url-item">';
+        if (isDone) {
+          result += '<input type="checkbox" class="item-check" data-index="' + i + '" onchange="updateBulkBar()">';
+        } else {
+          result += '<span style="width:18px;display:inline-block;flex-shrink:0"></span>';
+        }
+        result += '<span class="item-filename">' + (item.outputFilename || item.label || '') + '</span>';
+        result += '<span class="status-badge ' + s.cls + '">' + s.label + '</span>';
+        if (isDone && item.slideCount > 0) {
+          result += '<span class="slide-count">' + item.slideCount + '장</span>';
+        }
+        if (item.status === 'error') {
+          result += '<span style="color:#FF3B30;font-size:11px;flex-shrink:0" title="' + (item.error || '') + '">⚠️</span>';
+        }
+        if (isDone) {
+          result += '<button class="action-btn" onclick="showPreview(' + i + ')">미리보기</button>';
+          result += '<button class="action-btn action-btn-dl" onclick="downloadItemMD(' + i + ')">다운로드</button>';
+        }
+        result += '</div>';
+        return result;
+      }).join('');
+      if (document.getElementById('resultSortSelect')) {
+        document.getElementById('resultSortSelect').value = resultSortKey;
+      }
+    }
+    function toggleSelectAll() {
+      var checks = document.querySelectorAll('.item-check');
+      var allChecked = checks.length > 0 && Array.from(checks).every(function(cb) { return cb.checked; });
+      checks.forEach(function(cb) { cb.checked = !allChecked; });
+      updateBulkBar();
+    }
+    function updateBulkBar() {
+      var checks = document.querySelectorAll('.item-check:checked');
+      var bar = document.getElementById('bulkBar');
+      if (checks.length > 0) {
+        bar.classList.add('show');
+        document.getElementById('bulkCount').textContent = checks.length + '개 선택';
+      } else {
+        bar.classList.remove('show');
+      }
+    }
+    function getSelectedIndices() {
+      var checks = document.querySelectorAll('.item-check:checked');
+      var indices = [];
+      checks.forEach(function(cb) { indices.push(parseInt(cb.getAttribute('data-index'))); });
+      return indices;
+    }
+    async function downloadSelected() {
+      var indices = getSelectedIndices();
+      if (indices.length === 0) { alert('파일을 선택하세요.'); return; }
+      if (indices.length === 1) {
+        window.location.href = '/api/download/' + currentJobId + '/' + indices[0];
+        return;
+      }
+      try {
+        var res = await fetch('/api/download-selected/' + currentJobId, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ indices: indices })
+        });
+        if (res.ok) {
+          var blob = await res.blob();
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement('a'); a.href = url; a.download = 'selected_slides.zip';
+          a.click(); URL.revokeObjectURL(url);
+        } else { var err = await res.json(); alert(err.error || '다운로드 실패'); }
+      } catch(e) { alert('선택 다운로드 실패: ' + e.message); }
+    }
+    async function downloadMerged() {
+      try {
+        var res = await fetch('/api/merge/' + currentJobId, { method: 'POST' });
+        if (res.ok) {
+          var blob = await res.blob();
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement('a'); a.href = url; a.download = 'merged_slides.md';
+          a.click(); URL.revokeObjectURL(url);
+        } else { var err = await res.json(); alert(err.error || '병합 실패'); }
+      } catch(e) { alert('병합 실패: ' + e.message); }
+    }
+    function downloadSingleMD() { if (currentJobId) window.location.href = '/api/download/' + currentJobId; }
+    function downloadItemMD(index) { if (currentJobId) window.location.href = '/api/download/' + currentJobId + '/' + index; }
+    function downloadZip() { if (currentJobId) window.location.href = '/api/download/' + currentJobId; }
+
+    // ── PPTX 파이프라인 ──
+
+    function showPptxSection() {
+      var section = document.getElementById('pptxSection');
+      if (section) section.classList.add('show');
+    }
+
+    async function deleteSelectedItems() {
+      var indices = getSelectedIndices();
+      if (indices.length === 0) { alert('삭제할 항목을 선택하세요.'); return; }
+      if (!confirm(indices.length + '개 파일을 삭제하시겠습니까?')) return;
+
+      try {
+        var res = await fetch('/api/delete-items/' + currentJobId, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ indices: indices })
+        });
+        var data = await res.json();
+        if (res.ok) {
+          // 상태 다시 로드
+          var statusRes = await fetch('/api/status/' + currentJobId);
+          var job = await statusRes.json();
+          lastJob = job;
+          renderJobStatus(job);
+          showDownloadButtons(job);
+          updateBulkBar();
+        } else {
+          alert(data.error || '삭제 실패');
+        }
+      } catch (e) {
+        alert('삭제 오류: ' + e.message);
+      }
+    }
+
+    async function convertSelectedToPptx() {
+      var indices = getSelectedIndices();
+      if (indices.length === 0) { alert('PPTX로 변환할 MD 파일을 선택하세요.'); return; }
+
+      showPptxSection();
+
+      var progressDiv = document.getElementById('pptxProgress');
+      var progressBar = document.getElementById('pptxProgressBar');
+      var progressText = document.getElementById('pptxProgressText');
+      var resultsDiv = document.getElementById('pptxResults');
+
+      progressDiv.style.display = 'block';
+      progressBar.style.width = '30%';
+      progressText.textContent = 'PPTX 변환 중... (' + indices.length + '개 파일)';
+      resultsDiv.innerHTML = '';
+
+      var settings = {
+        font_name: document.getElementById('pptxFont').value,
+        title_size: parseInt(document.getElementById('pptxTitleSize').value) || 22,
+        body_size: parseInt(document.getElementById('pptxBodySize').value) || 16,
+        line_spacing_multiplier: parseFloat(document.getElementById('pptxLineSpacing').value) || 1.5,
+        code_font_separate: false
+      };
+
+      try {
+        progressBar.style.width = '60%';
+
+        var res = await fetch('/api/convert-pptx/' + currentJobId, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ indices: indices, settings: settings })
+        });
+
+        if (!res.ok) {
+          var errData = await res.json();
+          throw new Error(errData.error || 'PPTX 변환 실패');
+        }
+
+        progressBar.style.width = '90%';
+        progressText.textContent = '다운로드 준비 중...';
+
+        var blob = await res.blob();
+        var contentType = res.headers.get('content-type') || '';
+        var contentDisposition = res.headers.get('content-disposition') || '';
+
+        // 파일명 추출
+        var filename = 'output.pptx';
+        var fnMatch = contentDisposition.match(/filename="?([^";\s]+)"?/);
+        if (fnMatch) filename = fnMatch[1];
+
+        // 결과 표시
+        progressBar.style.width = '100%';
+        progressText.textContent = '변환 완료!';
+
+        var url = URL.createObjectURL(blob);
+        var isZip = contentType.indexOf('zip') !== -1 || filename.endsWith('.zip');
+
+        resultsDiv.innerHTML =
+          '<div class="pptx-result-item">' +
+            '<span class="icon">' + (isZip ? '📦' : '📊') + '</span>' +
+            '<div class="info">' +
+              '<div class="label">' + filename + '</div>' +
+              '<div class="meta">' + formatSize(blob.size) + ' · ' + indices.length + '개 MD에서 변환됨</div>' +
+            '</div>' +
+            '<button class="btn-download" onclick="downloadPptxResult(\'' + url + '\', \'' + filename + '\')">다운로드</button>' +
+          '</div>';
+
+        // 3초 후 프로그레스 숨김
+        setTimeout(function() {
+          progressDiv.style.display = 'none';
+        }, 3000);
+
+      } catch (e) {
+        progressBar.style.width = '100%';
+        progressBar.style.background = '#FF3B30';
+        progressText.textContent = '오류: ' + e.message;
+        resultsDiv.innerHTML =
+          '<div style="color:#FF3B30;font-size:13px;padding:12px;background:rgba(255,59,48,0.06);border-radius:12px">' +
+            '⚠️ ' + e.message +
+            '<br><span style="color:#8E8E93;font-size:12px">port 8001 FastAPI 서버가 실행 중인지 확인하세요.</span>' +
+          '</div>';
+      }
+    }
+
+    function downloadPptxResult(url, filename) {
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+    }
+
+    async function showPreview(index) {
+      var res = await fetch('/api/preview/' + currentJobId + '/' + index);
+      var data = await res.json();
+      document.getElementById('previewContent').textContent = data.content;
+      document.getElementById('previewModal').classList.add('show');
+    }
+    function closePreview() { document.getElementById('previewModal').classList.remove('show'); }
+  </script>
+</body>
+</html>

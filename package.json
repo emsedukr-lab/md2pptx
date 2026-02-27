@@ -1,0 +1,15 @@
+{
+  "name": "md2pptx-monorepo",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:3000": "npm run dev --workspace=apps/app-3000",
+    "dev:3001": "npm run dev --workspace=apps/app-3001",
+    "dev": "npm run dev:3000 & npm run dev:3001",
+    "build": "npm run build --workspace=apps/app-3001",
+    "lint": "npm run lint --workspace=apps/app-3001"
+  }
+}

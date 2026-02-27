@@ -1,0 +1,98 @@
+@import "tailwindcss";
+
+@theme {
+  /* Linear-inspired color system */
+  --color-bg-primary: #0A0A0B;
+  --color-bg-secondary: #141416;
+  --color-bg-card: #1C1C1F;
+  --color-bg-hover: #232326;
+  --color-text-primary: #EDEDEF;
+  --color-text-muted: #8A8A8E;
+  --color-text-faint: #5C5C60;
+  --color-border: #2C2C30;
+  --color-border-subtle: #232326;
+  --color-violet: #7C5CFC;
+  --color-violet-hover: #6B4FD8;
+  --color-violet-muted: rgba(124, 92, 252, 0.15);
+  --color-green: #34D399;
+  --color-red: #F87171;
+  --color-yellow: #FBBF24;
+  --color-blue: #60A5FA;
+
+  --font-sans: "Inter", "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "Geist Mono", "SF Mono", "Fira Code", "Consolas", monospace;
+}
+
+/* ── Base ── */
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+}
+
+/* ── Light theme overrides ── */
+.light {
+  --color-bg-primary: #FFFFFF;
+  --color-bg-secondary: #F7F7F8;
+  --color-bg-card: #FFFFFF;
+  --color-bg-hover: #F0F0F2;
+  --color-text-primary: #1A1A1A;
+  --color-text-muted: #6B6B6F;
+  --color-text-faint: #A0A0A4;
+  --color-border: #E5E5E7;
+  --color-border-subtle: #EEEEEF;
+  --color-violet: #7C5CFC;
+  --color-violet-hover: #6B4FD8;
+  --color-violet-muted: rgba(124, 92, 252, 0.08);
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-faint);
+}
+
+/* ── Selection ── */
+::selection {
+  background: var(--color-violet-muted);
+  color: var(--color-text-primary);
+}
+
+/* ── Focus ring ── */
+*:focus-visible {
+  outline: 2px solid var(--color-violet);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ── Transition defaults ── */
+* {
+  transition-property: color, background-color, border-color, box-shadow, opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* ── Page fade-in ── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 200ms ease-out;
+}
