@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/api/:path*",
-        destination: "http://localhost:8001/api/:path*",
+        destination: `http://${process.env.PPTX_HOST || "localhost"}:${process.env.PPTX_PORT || "8001"}/api/:path*`,
       },
     ];
   },

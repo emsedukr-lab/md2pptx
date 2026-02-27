@@ -13,6 +13,8 @@ var converter = require('./lib/converter');
 var zipper = require('./lib/zipper');
 var app = express();
 var PORT = process.env.PORT || 3000;
+var PPTX_HOST = process.env.PPTX_HOST || 'localhost';
+var PPTX_PORT = parseInt(process.env.PPTX_PORT) || 8001;
 var TEMP_DIR = path.join(__dirname, 'temp');
 if (!fs.existsSync(TEMP_DIR)) fs.mkdirSync(TEMP_DIR, { recursive: true });
 app.use(cors());
@@ -308,8 +310,8 @@ app.post('/api/convert-pptx/:jobId', async function(req, res) {
 
     var proxyRes = await new Promise(function(resolve, reject) {
       var options = {
-        hostname: 'localhost',
-        port: 8001,
+        hostname: PPTX_HOST,
+        port: PPTX_PORT,
         path: '/api/convert',
         method: 'POST',
         headers: form.getHeaders()

@@ -1,0 +1,24 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build and start containers
+        run: docker compose build
+
+      - name: Deploy
+        run: docker compose up -d
+
+      - name: Health check
+        run: |
+          sleep 10
+          curl -f http://localhost:3000/ || exit 1
+          curl -f http://localhost:8001/docs || exit 1
+          echo "All services healthy"
